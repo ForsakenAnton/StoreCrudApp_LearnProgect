@@ -1,0 +1,35 @@
+﻿@model CategorySubIndexVM
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Category SubIndex</h1>
+
+<div>
+    <div class="text-center mb-5 border border-bottom border-5">
+        <img src="@Url.Content(Model.Category.ImagePath)"
+             alt="Model.CategoryDTO.ImagePath"
+             class="d-inline-block mb-1"
+             width="200" />
+        <h3> @Model.Category.Id - @Model.Category.Name</h3>
+    </div>
+
+    <div class="d-flex flex-wrap g-3">
+        @foreach (var subCategory in Model.Category.Categories!)
+        {
+            <div class="text-center border border border-3 rounded p-3">
+                <img src="@Url.Content(subCategory.ImagePath)"
+                     alt="Model.CategoryDTO.ImagePath"
+                     class="d-block mb-1"
+                     width="200" />
+                <h3>
+                    <a asp-action="SubIndex"
+                       asp-route-categoryId="@subCategory.Id">
+                        @subCategory.Id - @subCategory.Name
+                    </a>
+                </h3>
+            </div>
+        }
+    </div>
+</div>
+

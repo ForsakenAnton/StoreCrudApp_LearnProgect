@@ -1,0 +1,30 @@
+﻿@using StoreCrudApp.Models.OtherExampleClassesAndModels
+@model FormFileEditModel
+
+@{
+    ViewData["Title"] = "UploadFile";
+}
+
+
+<form asp-action="UploadFile"
+      method="post"
+      enctype="multipart/form-data">
+
+    <div asp-validation-summary="All"></div>
+
+    <input type="hidden" asp-for="ExistingImagePath" />
+
+
+    <label>Current image</label>
+    @if (!string.IsNullOrEmpty(Model.ExistingImagePath))
+    {
+        <img src="@(Url.Content(Model.ExistingImagePath))" width="100" />
+    }
+
+    <label>Upload a new image</label>
+    <input type="file" asp-for="NewImage" />
+
+    <button type="submit">Save</button>
+</form>
+
+

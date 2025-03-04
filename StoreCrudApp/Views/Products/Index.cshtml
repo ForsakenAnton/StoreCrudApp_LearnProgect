@@ -1,0 +1,131 @@
+﻿@model ProductsIndexVM
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+    @if (ViewBag.CategoryIdAndName is not null)
+    {
+    <p class="fs-3 text-info">
+        Category: @ViewBag.CategoryIdAndName
+    </p>
+    }
+
+
+@foreach (var item in Model.Products!)
+{
+    Console.WriteLine(item.Name);
+}
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Products!.FirstOrDefault()!.Images)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Products!.FirstOrDefault()!.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Products!.FirstOrDefault()!.Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Products!.FirstOrDefault()!.Price)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Products!.FirstOrDefault()!.DiscountPercent)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Products!.FirstOrDefault()!.Discount)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Products!.FirstOrDefault()!.CreationDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Products!.FirstOrDefault()!.Rating)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Products!.FirstOrDefault()!.TopLevel)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Products!.FirstOrDefault()!.Manufacturer!.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Products!.FirstOrDefault()!.Categories)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Products ?? [])
+        {
+            <tr>
+                <td>
+                    <partial name="_CarouselPartial"
+                    model="item.Images"
+                    view-data='@new ViewDataDictionary(ViewData)
+                             {
+                                 { "Id", item.Id }
+                             }' />
+                </td>
+
+
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Price)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DiscountPercent)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Discount)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CreationDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Rating)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TopLevel)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Manufacturer!.Name)
+                </td>
+                <td class="text-success">
+                    @if (item.Categories is not null)
+                    {
+                        @foreach (var category in item.Categories)
+                        {
+                            <div>@category.Id - @category.Name</div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-warning fw-bold">No category</div>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<hr>
+<hr>
+<hr>
+<hr>

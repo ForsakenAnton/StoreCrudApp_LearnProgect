@@ -1,0 +1,80 @@
+﻿@model ProductCreateVM
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Product</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create" enctype="multipart/form-data">
+
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group">
+                <label asp-for="Product.Name" class="control-label"></label>
+                <input asp-for="Product.Name" class="form-control" />
+                <span asp-validation-for="Product.Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Product.Description" class="control-label"></label>
+                <input asp-for="Product.Description" class="form-control" />
+                <span asp-validation-for="Product.Description" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Product.Price" class="control-label"></label>
+                <input asp-for="Product.Price" class="form-control" />
+                <span asp-validation-for="Product.Price" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Product.DiscountPercent" class="control-label"></label>
+                <input asp-for="Product.DiscountPercent" class="form-control" />
+                <span asp-validation-for="Product.DiscountPercent" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Product.Rating" class="control-label"></label>
+                <input asp-for="Product.Rating" type="range" min="0" max="5" class="form-range" />
+                <span asp-validation-for="Product.Rating" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Product.TopLevel" class="control-label"></label>
+                <input asp-for="Product.TopLevel" type="range" min="0" max="10" class="form-range" />
+                <span asp-validation-for="Product.TopLevel" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Product.ManufacturerId" class="control-label"></label>
+                <select asp-for="Product.ManufacturerId"
+                        asp-items="@Model.ManufacturerSL"
+                        class="form-control">
+                    <option selected disabled>Chose the manufacturer</option>
+                </select>
+                <span asp-validation-for="Product.ManufacturerId" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Files"></label>
+                <input asp-for="Files" class="form-control" multiple />
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

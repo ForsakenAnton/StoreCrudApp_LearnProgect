@@ -1,0 +1,97 @@
+﻿@model ProductDetailsVM
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Product</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Product!.Name)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Product!.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Product!.Description)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Product!.Description)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Product!.Price)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Product!.Price)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Product!.DiscountPercent)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Product!.DiscountPercent)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Product!.CreationDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Product!.CreationDate)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Product!.Rating)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Product!.Rating)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Product!.TopLevel)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Product!.TopLevel)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Product!.Manufacturer)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Product!.Manufacturer!.Id)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Product!.Categories)
+        </dt>
+        <dd class="col-sm-10">
+            @if (Model.Product!.Categories is not null)
+            {
+                @foreach (var category in Model.Product.Categories)
+                {
+                    <div class="mb-1">
+                        <img src="@Url.Content(category.ImagePath)"
+                             alt="category.ImagePath"
+                             width="50" />
+                        @category.Id - @category.Name
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-warning fw-bold">No category</div>
+            }
+        </dd>
+
+        <dt>Images</dt>
+        <dd>
+            <partial name="_CarouselPartial"
+                     model="Model.Product!.Images"
+                     view-data='@new ViewDataDictionary(ViewData)
+                     {
+                         { "Id", Model.Product!.Id }
+                     }' />
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Product!.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

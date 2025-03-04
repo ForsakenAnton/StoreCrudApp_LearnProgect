@@ -1,0 +1,40 @@
+﻿@using StoreCrudApp.Models.OtherExampleClassesAndModels
+@model FormFileCollectionEditModel
+
+@{
+    ViewData["Title"] = "UploadFileCollection";
+}
+
+
+<form asp-action="UploadFileCollection"
+method="post"
+enctype="multipart/form-data">
+
+    @for (int i = 0; i < Model.ExistingImagePaths.Count; i++)
+    {
+       <input type="hidden" asp-for="ExistingImagePaths[i]" />
+    }
+
+    <div asp-validation-summary="All"></div>
+
+    <label>Current images</label>
+    @if (Model.ExistingImagePaths.Any())
+    {
+        <div>
+            @foreach (string imagePath in Model.ExistingImagePaths)
+            {
+                <div>
+                    <img src="@Url.Content(imagePath)" width="100" />
+                    <input type="checkbox" name="ImagesToDelete" value="@imagePath" /> Remove
+                </div>
+            }
+        </div>
+    }
+
+    <label>Upload new images</label>
+    <input type="file" asp-for="NewImages" multiple />
+
+    <button type="submit">Save</button>
+</form>
+
+

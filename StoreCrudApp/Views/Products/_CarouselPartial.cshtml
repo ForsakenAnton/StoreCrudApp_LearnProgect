@@ -1,0 +1,37 @@
+﻿@model IEnumerable<ImageDTO>
+
+
+@if (Model != null)
+{
+    <div id="imageCarousel@(ViewData["Id"])" class="carousel slide">
+        <div class="carousel-inner" style="width:10rem">
+            @{
+                string firstActive = "active";
+            }
+            @foreach (var image in Model ?? [])
+            {
+                <div class="carousel-item @firstActive">
+                    <img src="@(Url.Content(image.Path))"
+                         class="d-block w-100"
+                         alt="@(Url.Content(image.Path))">
+                </div>
+
+                firstActive = "";
+            }
+        </div>
+        <button class="carousel-control-prev"
+                type="button"
+                data-bs-target="#imageCarousel@(ViewData["Id"])"
+                data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next"
+                type="button"
+                data-bs-target="#imageCarousel@(ViewData["Id"])"
+                data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+}
