@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using NuGet.Packaging;
 using StoreCrudApp.Data;
 using StoreCrudApp.Data.Entities;
+using StoreCrudApp.Models.DTO.Category;
 using StoreCrudApp.Models.DTO.Manufacturer;
 using StoreCrudApp.Models.DTO.Product;
 using StoreCrudApp.Models.ViewModels.Product;
@@ -20,7 +21,7 @@ public class ProductsController : Controller
     private readonly IWebHostEnvironment _webHostEnvironment;
 
     public ProductsController(
-        ApplicationContext context, 
+        ApplicationContext context,
         IMapper mapper,
         IWebHostEnvironment webHostEnvironment)
     {
@@ -37,13 +38,13 @@ public class ProductsController : Controller
             .Include(c => c.Products)
             .FirstOrDefaultAsync(c => c.Id == categoryId);
 
-        if (category is not null && 
+        if (category is not null &&
             !category.IsProductCategory)
         {
             return RedirectToAction(
                 actionName: "SubIndex",
                 controllerName: "Categories",
-                new { categoryId });
+                new { categoryId = categoryId });
         }
 
         var productsEntities = _context.Products
@@ -120,9 +121,24 @@ public class ProductsController : Controller
             dataValueField: "Id",
             dataTextField: "Name");
 
+
+        var categories = await _context.Categories
+            //.Where(c => c.Categories == null)
+            .ToListAsync();
+
+        categories = categories.Where(c => c.Categories == null).ToList();
+
+        var categoriesDTO = _mapper.Map<IEnumerable<CategoryDTO>>(categories);
+
+        MultiSelectList categoryMSL = new MultiSelectList(
+           items: categoriesDTO,
+           dataValueField: "Id",
+           dataTextField: "Name");
+
         ProductCreateVM vm = new()
         {
-            ManufacturerSL = manufacturerSL
+            ManufacturerSL = manufacturerSL,
+            CategoryMSL = categoryMSL
         };
 
 
@@ -147,13 +163,29 @@ public class ProductsController : Controller
 
             vm.ManufacturerSL = manufacturerSL;
 
+
+            var categories = await _context.Categories
+                //.Where(c => c.Categories == null)
+                .ToListAsync();
+
+            categories = categories.Where(c => c.Categories == null).ToList();
+
+            var categoriesDTO = _mapper.Map<IEnumerable<CategoryDTO>>(categories);
+
+            MultiSelectList categoryMSL = new MultiSelectList(
+               items: categoriesDTO,
+               dataValueField: "Id",
+               dataTextField: "Name");
+
+            vm.CategoryMSL = categoryMSL;
+
             return View(vm);
         }
 
         string wwwroot = _webHostEnvironment.WebRootPath;
         string filesDir = "images";
 
-        
+
         foreach (IFormFile file in vm.Files)
         {
             string fileName = $"{wwwroot}/{filesDir}/{file.FileName}";
@@ -168,8 +200,22 @@ public class ProductsController : Controller
             Path = $"/{filesDir}/{f.FileName}"
         });
 
+        List<Category> selectedCategories = new List<Category>();
+
+        foreach (int id in vm.SelectedCategoryIds ?? [])
+        {
+            var selectedCategory = await _context.Categories
+                .FirstOrDefaultAsync(c => c.Id == id);
+            if (selectedCategory is not null)
+            {
+                selectedCategories.Add(selectedCategory);
+            }
+        }
+
+
         Product product = _mapper.Map<Product>(vm.Product);
         product.Images = images.ToList();
+        product.Categories = selectedCategories;
 
         await _context.Products.AddAsync(product);
         await _context.SaveChangesAsync();
@@ -190,13 +236,57 @@ public class ProductsController : Controller
             return NotFound();
         }
 
-        var product = await _context.Products.FindAsync(id);
+        var product = await _context.Products
+            .Include(p => p.Manufacturer)
+            .Include(p => p.Categories)
+            .Include(p => p.Images)
+            .FirstOrDefaultAsync(p => p.Id == id);
         if (product == null)
         {
             return NotFound();
         }
-        ViewData["ManufacturerId"] = new SelectList(_context.Set<Manufacturer>(), "Id", "Id", product.ManufacturerId);
-        return View(product);
+
+        var manufacturers = await _context.Manufacturers.ToListAsync();
+        var manufacturersDTO = _mapper.Map<IEnumerable<ManufacturerDTO>>(manufacturers);
+
+        SelectList manufacturerSL = new SelectList(
+            items: manufacturersDTO,
+            dataValueField: "Id",
+            dataTextField: "Name",
+            selectedValue: product.ManufacturerId);
+
+
+        var categories = await _context.Categories
+            //.Where(c => c.Categories == null)
+            .ToListAsync();
+
+        categories = categories.Where(c => c.Categories == null).ToList();
+        var categoriesDTO = _mapper.Map<IEnumerable<CategoryDTO>>(categories);
+
+        MultiSelectList categoryMSL = new MultiSelectList(
+           items: categoriesDTO,
+           dataValueField: "Id",
+           dataTextField: "Name",
+           selectedValues: product.Categories);
+
+        IEnumerable<string>? existingImagePaths = product.Images?
+            .Select(i => i.Path);
+
+        IEnumerable<int>? selectedCategoryIds = product.Categories?
+            .Select(c => c.Id);
+
+        ProductEditDTO productEditDTO = _mapper.Map<ProductEditDTO>(product);
+
+        ProductEditVM vm = new()
+        {
+            Product = productEditDTO,
+            ManufacturerSL = manufacturerSL,
+            CategoryMSL = categoryMSL,
+            SelectedCategoryIds = selectedCategoryIds?.ToArray(),
+            ExistingImagePaths = existingImagePaths?.ToList(),
+        };
+
+        return View(vm);
     }
 
     // POST: Products/Edit/5
@@ -204,35 +294,127 @@ public class ProductsController : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Price,DiscountPercent,CreationDate,Rating,TopLevel,ManufacturerId")] Product product)
+    public async Task<IActionResult> Edit(int id, ProductEditVM vm)
     {
-        if (id != product.Id)
+        if (id != vm.Product.Id)
         {
             return NotFound();
         }
 
-        if (ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
-            try
+            var manufacturers = await _context.Manufacturers.ToListAsync();
+            var manufacturersDTO = _mapper.Map<IEnumerable<ManufacturerDTO>>(manufacturers);
+
+            SelectList manufacturerSL = new SelectList(
+                items: manufacturersDTO,
+                dataValueField: "Id",
+                dataTextField: "Name",
+                selectedValue: vm.Product.ManufacturerId);
+
+            vm.ManufacturerSL = manufacturerSL;
+
+
+            var categories = await _context.Categories
+                .ToListAsync();
+
+            categories = categories.Where(c => c.Categories == null).ToList();
+            var categoriesDTO = _mapper.Map<IEnumerable<CategoryDTO>>(categories);
+
+            MultiSelectList categoryMSL = new MultiSelectList(
+               items: categoriesDTO,
+               dataValueField: "Id",
+               dataTextField: "Name");
+
+            vm.CategoryMSL = categoryMSL;
+
+            return View(vm);
+        }
+
+        try
+        {
+            string wwwroot = _webHostEnvironment.WebRootPath;
+            string filesDir = "images";
+
+            foreach (IFormFile file in vm.NewImages ?? [])
             {
-                _context.Update(product);
-                await _context.SaveChangesAsync();
+                string fileName = $"{wwwroot}/{filesDir}/{file.FileName}";
+                using (FileStream fs = new FileStream(fileName, FileMode.OpenOrCreate))
+                {
+                    await file.CopyToAsync(fs);
+                }
             }
-            catch (DbUpdateConcurrencyException)
+
+            // Get the product and track its changes
+            Product? existingProduct = await _context.Products
+                .Include(p => p.Categories)
+                .Include(p => p.Images)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (existingProduct is null)
             {
-                if (!ProductExists(product.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound();
             }
+
+            // Mapping
+            _mapper.Map(
+                source: vm.Product,
+                destination: existingProduct);
+
+            // Create images and categories to add/change ////////////////////////
+            IEnumerable<Image>? imagesToAdd = vm.NewImages?.Select(f => new Image
+            {
+                Path = $"/{filesDir}/{f.FileName}"
+            });
+
+            List<Category> selectedCategoriesToAdd = await _context.Categories
+                .Where(c => vm.SelectedCategoryIds!
+                .Any(sc => sc == c.Id)).ToListAsync();
+            // ///////////////////////////////////////////////////////////////////
+
+
+            //IEnumerable<string>? intersectedImagesToDelete = vm.ExistingImagePaths?
+            //    .Intersect(vm.ImagesToDelete);
+
+            //foreach (string imagePath in intersectedImagesToDelete ?? [])
+            //{
+            //    Image? imageToDelete = existingProduct.Images?
+            //        .FirstOrDefault(i => i.Path == imagePath);
+            //    if (imageToDelete is not null)
+            //    {
+            //        existingProduct.Images?.Remove(imageToDelete);
+            //    }
+            //}
+
+
+            // Elegant removal the imagesToDelete from the tracking product (EF Core traching) using LINQ 
+            existingProduct.Images = existingProduct.Images?
+                .Where(image => !(vm.ImagesToDelete ?? []).Contains(image.Path))
+                .ToList();
+
+
+            // Add images and categories
+            // (the manufacturer is already changed in the Product.ManufacturerId field)
+            if (imagesToAdd is not null)
+            {
+                existingProduct.Images.AddRange(imagesToAdd);
+            }
+
+            existingProduct.Categories?.Clear();
+            existingProduct.Categories.AddRange(selectedCategoriesToAdd);
+            // ////////////////////////////////////////////////////////////////////////////////
+
+            _context.Products.Update(existingProduct);
+            await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
-        ViewData["ManufacturerId"] = new SelectList(_context.Set<Manufacturer>(), "Id", "Id", product.ManufacturerId);
-        return View(product);
+        catch (DbUpdateConcurrencyException ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
+        return RedirectToAction(nameof(Index));
     }
 
 

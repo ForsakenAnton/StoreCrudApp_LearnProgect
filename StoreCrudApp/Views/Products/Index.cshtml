@@ -6,12 +6,12 @@
 
 <h1>Index</h1>
 
-    @if (ViewBag.CategoryIdAndName is not null)
-    {
+@if (ViewBag.CategoryIdAndName is not null)
+{
     <p class="fs-3 text-info">
         Category: @ViewBag.CategoryIdAndName
     </p>
-    }
+}
 
 
 @foreach (var item in Model.Products!)
@@ -67,8 +67,8 @@
             <tr>
                 <td>
                     <partial name="_CarouselPartial"
-                    model="item.Images"
-                    view-data='@new ViewDataDictionary(ViewData)
+                             model="item.Images"
+                             view-data='@new ViewDataDictionary(ViewData)
                              {
                                  { "Id", item.Id }
                              }' />
@@ -103,7 +103,7 @@
                     @Html.DisplayFor(modelItem => item.Manufacturer!.Name)
                 </td>
                 <td class="text-success">
-                    @if (item.Categories is not null)
+                    @if (item.Categories is not null && item.Categories.Any())
                     {
                         @foreach (var category in item.Categories)
                         {

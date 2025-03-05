@@ -17,7 +17,7 @@ public class SharedProfile : Profile
         CreateMap<Category, CategoryDTO>();
 
         CreateMap<ProductCreateDTO, Product>();
-        // TODO ProductEditDTO
+        CreateMap<Product, ProductEditDTO>().ReverseMap();
         CreateMap<Product, ProductDeleteDTO>();
     }
 }

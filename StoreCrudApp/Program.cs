@@ -29,7 +29,8 @@ var app = builder.Build();
 
 app.UseRequestLocalization(localizationOptions =>
 {
-    var defaultCulture = new CultureInfo(CultureInfo.InvariantCulture.Name);
+    //var defaultCulture = new CultureInfo(CultureInfo.InvariantCulture.Name);
+    var defaultCulture = new CultureInfo("en-US");
 
     localizationOptions.DefaultRequestCulture = new RequestCulture(defaultCulture);
     localizationOptions.SupportedCultures = new List<CultureInfo> { defaultCulture };

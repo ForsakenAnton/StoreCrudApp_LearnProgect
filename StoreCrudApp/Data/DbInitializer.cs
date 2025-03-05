@@ -60,7 +60,6 @@ public static class DbInitializer
                 new Category
                 {
                     Name = "Electronic",
-                    //ParentCommentId = null,
                     ParentId = null,
                     ImagePath = imagePlaceholderPath,
                     Categories = new List<Category>()

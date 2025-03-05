@@ -61,6 +61,6 @@ public class CategoriesController : Controller
         return RedirectToAction(
             actionName: "Index",
             controllerName: "Products",
-            new { categoryId });
+            new { categoryId = categoryId });
     }
 }

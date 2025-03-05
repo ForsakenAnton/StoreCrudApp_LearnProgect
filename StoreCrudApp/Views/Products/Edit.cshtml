@@ -1,4 +1,4 @@
-﻿@model StoreCrudApp.Data.Entities.Product
+﻿@model ProductEditVM
 
 @{
     ViewData["Title"] = "Edit";
@@ -10,51 +10,106 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
+
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
+
+            <input asp-for="Product.Id" type="hidden" />
+
             <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+                <label asp-for="Product.Name" class="control-label"></label>
+                <input asp-for="Product.Name" class="form-control" />
+                <span asp-validation-for="Product.Name" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
+                <label asp-for="Product.Description" class="control-label"></label>
+                <input asp-for="Product.Description" class="form-control" />
+                <span asp-validation-for="Product.Description" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <label asp-for="Price" class="control-label"></label>
-                <input asp-for="Price" class="form-control" />
-                <span asp-validation-for="Price" class="text-danger"></span>
+                <label asp-for="Product.Price" class="control-label"></label>
+                <input asp-for="Product.Price" class="form-control" />
+                <span asp-validation-for="Product.Price" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <label asp-for="DiscountPercent" class="control-label"></label>
-                <input asp-for="DiscountPercent" class="form-control" />
-                <span asp-validation-for="DiscountPercent" class="text-danger"></span>
+                <label asp-for="Product.DiscountPercent" class="control-label"></label>
+                <input asp-for="Product.DiscountPercent" class="form-control" />
+                <span asp-validation-for="Product.DiscountPercent" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <label asp-for="CreationDate" class="control-label"></label>
-                <input asp-for="CreationDate" class="form-control" />
-                <span asp-validation-for="CreationDate" class="text-danger"></span>
+                <label asp-for="Product.Rating" class="control-label"></label>
+                <input asp-for="Product.Rating" type="range" min="0" max="5" class="form-range" />
+                <span asp-validation-for="Product.Rating" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Rating" class="control-label"></label>
-                <input asp-for="Rating" class="form-control" />
-                <span asp-validation-for="Rating" class="text-danger"></span>
+
+            <div class="mb-3">
+                <label asp-for="Product.TopLevel" class="control-label"></label>
+                <input asp-for="Product.TopLevel" type="range" min="0" max="10" class="form-range" />
+                <span asp-validation-for="Product.TopLevel" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="TopLevel" class="control-label"></label>
-                <input asp-for="TopLevel" class="form-control" />
-                <span asp-validation-for="TopLevel" class="text-danger"></span>
+
+            <div class="mb-3">
+                <label asp-for="Product.ManufacturerId" class="control-label"></label>
+                <select asp-for="Product.ManufacturerId"
+                        asp-items="@Model.ManufacturerSL"
+                        class="form-control">
+                </select>
+                <span asp-validation-for="Product.ManufacturerId" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="ManufacturerId" class="control-label"></label>
-                <select asp-for="ManufacturerId" class="form-control" asp-items="ViewBag.ManufacturerId"></select>
-                <span asp-validation-for="ManufacturerId" class="text-danger"></span>
+
+            <div class="mb-3">
+                <label asp-for="SelectedCategoryIds" class="control-label"></label>
+                <select multiple
+                        asp-for="SelectedCategoryIds"
+                        asp-items="@Model.CategoryMSL"
+                        class="form-control">
+                </select>
+                <span asp-validation-for="SelectedCategoryIds" class="text-danger"></span>
             </div>
+
+            <div class="mb-3">
+                <label asp-for="NewImages"></label>
+                <input asp-for="NewImages" class="form-control" multiple />
+            </div>
+
+
+            @for (int i = 0; i < Model.ExistingImagePaths!.Count; i++)
+            {
+                <input type="hidden" asp-for="ExistingImagePaths[i]" />
+            }
+
+            <label>Current images</label>
+            @if (Model.ExistingImagePaths.Any())
+            {
+                <div>
+                    @foreach (string imagePath in Model.ExistingImagePaths)
+                    {
+                        <div>
+                            <img src="@Url.Content(imagePath)" width="100" />
+                            <input type="checkbox"
+                                   name="ImagesToDelete"
+                                   value="@imagePath" /> Remove
+                        </div>
+                    }
+                    @*                     @for (int i = 0; i < Model.ExistingImagePaths.Count; i++)
+                    {
+                        <div>
+                            <img src="@Url.Content(Model.ExistingImagePaths[i])" width="100" />
+                            <input asp-for="ExistingImagePaths[i]"
+                                   type="checkbox"
+                                   name="ImagesToDelete"
+                                   class="form-check" /> Remove
+                        </div>
+                    } *@
+                </div>
+            }
+
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="Create" class="btn btn-primary" />
             </div>
         </form>
     </div>
@@ -64,6 +119,8 @@
     <a asp-action="Index">Back to List</a>
 </div>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+@* @section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+} *@

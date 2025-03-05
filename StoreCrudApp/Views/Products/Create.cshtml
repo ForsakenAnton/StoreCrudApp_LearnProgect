@@ -10,7 +10,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create" enctype="multipart/form-data">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
 
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -50,12 +50,23 @@
             </div>
             <div class="mb-3">
                 <label asp-for="Product.ManufacturerId" class="control-label"></label>
-                <select asp-for="Product.ManufacturerId"
+                <select multiple
+                        asp-for="Product.ManufacturerId"
                         asp-items="@Model.ManufacturerSL"
                         class="form-control">
                     <option selected disabled>Chose the manufacturer</option>
                 </select>
                 <span asp-validation-for="Product.ManufacturerId" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="SelectedCategoryIds" class="control-label"></label>
+                <select asp-for="SelectedCategoryIds"
+                        asp-items="@Model.CategoryMSL"
+                        class="form-control">
+                    <option selected disabled>Chose the categories</option>
+                </select>
+                <span asp-validation-for="SelectedCategoryIds" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
